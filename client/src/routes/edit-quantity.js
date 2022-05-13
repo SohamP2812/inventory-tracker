@@ -57,6 +57,17 @@ export default function EditQuantity() {
       });
   }
 
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className="py-20">
+          <p className="text-xl text-center">Loading...</p>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <Header />
