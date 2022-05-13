@@ -11,4 +11,6 @@ pg_ctl -l /home/runner/${REPL_SLUG}/postgresql.log start
 
 createdb -h 127.0.0.1 -d inventory
 
+cd server 
+
 yarn start
