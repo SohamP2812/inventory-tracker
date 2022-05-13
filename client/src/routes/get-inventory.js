@@ -7,6 +7,7 @@ export function GetFromInventory() {
   const [item, setItem] = useState();
   const [itemHistory, setItemHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
 
   let { name } = useParams();
 
@@ -15,6 +16,7 @@ export function GetFromInventory() {
       var b = s.split(/[-TZ:]/i);
       return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5]));
     }
+    setError("");
     setLoading(true);
     axios
       .get(`/api/inventory/${name}`)
@@ -37,11 +39,13 @@ export function GetFromInventory() {
             setLoading(false);
           })
           .catch((error) => {
+            setError(error.response.data.message);
             console.log(error);
             setLoading(false);
           });
       })
       .catch((error) => {
+        setError(error.response.data.message);
         console.log(error);
         setLoading(false);
       });
@@ -78,6 +82,7 @@ export function GetFromInventory() {
       <Header />
       <div className="py-20">
         <h1 className="text-4xl font-bold text-center mb-10">Get Item</h1>
+        <p className="text-red-600 text-center">{error}</p>
         {item && (
           <div className="w-[90%] m-auto">
             <p>
