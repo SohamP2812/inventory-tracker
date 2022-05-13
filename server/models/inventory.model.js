@@ -16,6 +16,14 @@ const Inventory = db.sequelize.define(
       type: db.Sequelize.STRING,
       allowNull: false,
     },
+    deleted: {
+      type: db.Sequelize.BOOLEAN,
+      defaultValue: false,
+    },
+    deletedDescription: {
+      type: db.Sequelize.STRING,
+      defaultValue: "",
+    },
     createdAt: { type: db.Sequelize.DATE, defaultValue: Date.now },
   },
   {
