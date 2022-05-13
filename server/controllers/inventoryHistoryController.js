@@ -3,7 +3,7 @@ const InventoryHistory = require("../models/InventoryHistory.model");
 exports.getAllInventoryHistory = (req, res) => {
   InventoryHistory.findAll({ order: [["createdAt", "DESC"]] })
     .then((inventoryHistory) => {
-      const message = inventory.length
+      const message = inventoryHistory.length
         ? "Retrieved Inventory History Successfully."
         : "No entries in history.";
       res.status(200).json({
