@@ -27,6 +27,8 @@ export function GetFromInventory() {
 
         setItem(response.data.item);
 
+        console.log(response.data.item);
+
         axios
           .get(`/api/inventory-history/item-name/${name}`)
           .then((response) => {
@@ -103,6 +105,17 @@ export function GetFromInventory() {
                 { hour: "2-digit", minute: "2-digit" }
               )}`}
             </p>
+            {item.deleted && (
+              <>
+                <p>
+                  <strong>DELETED</strong>
+                </p>
+                <p>
+                  <strong>Deleted Description: </strong>
+                  {item.deletedDescription}
+                </p>
+              </>
+            )}
           </div>
         )}
         <h1 className="text-4xl font-bold text-center my-10">Item History</h1>
@@ -172,23 +185,25 @@ export default function GetInventory() {
       });
   }
 
-  useEffect(() => {
-    getInventory();
-  }, [name]);
-
-  function deleteItem(name) {
-    setError("");
+  function undelete(itemName) {
     setLoading(true);
+    setError("");
     axios
-      .delete(`/api/inventory/${name}/delete`)
-      .then((response) => {
+      .put(`/api/inventory/${itemName}/undelete`)
+      .then(() => {
         getInventory();
+        setLoading(false);
       })
       .catch((error) => {
+        console.log(error);
         setError(error.response.data.message);
         setLoading(false);
       });
   }
+
+  useEffect(() => {
+    getInventory();
+  }, [name]);
 
   if (loading) {
     return (
@@ -224,22 +239,34 @@ export default function GetInventory() {
                 <div className="flex flex-col">
                   <p className="text-white">{item.itemName}</p>
                   <p className="text-white">Stock: {item.amountInStock}</p>
+                  {item.deleted && <p className="text-white">DELETED</p>}
                 </div>
                 <div>
-                  <button
-                    onClick={() => {
-                      deleteItem(item.itemName);
-                    }}
-                    className="bg-white text-black px-3 py-1 rounded-xl ml-2"
-                  >
-                    Delete item
-                  </button>
-                  <Link
-                    to={`/edit-quantity/${item.itemName}`}
-                    className="bg-white text-black px-3 py-1 rounded-xl ml-2"
-                  >
-                    Update Quantity
-                  </Link>
+                  {item.deleted ? (
+                    <button
+                      className="bg-white text-black px-3 py-1 rounded-xl ml-2"
+                      onClick={() => {
+                        undelete(item.itemName);
+                      }}
+                    >
+                      Undelete Item
+                    </button>
+                  ) : (
+                    <>
+                      <Link
+                        to={`/delete-from-inventory/${item.itemName}`}
+                        className="bg-white text-black px-3 py-1 rounded-xl ml-2"
+                      >
+                        Delete Item
+                      </Link>
+                      <Link
+                        to={`/edit-quantity/${item.itemName}`}
+                        className="bg-white text-black px-3 py-1 rounded-xl ml-2"
+                      >
+                        Update Quantity
+                      </Link>
+                    </>
+                  )}
                   <Link
                     to={`/get-inventory/${item.itemName}`}
                     className="bg-white text-black px-3 py-1 rounded-xl ml-2"

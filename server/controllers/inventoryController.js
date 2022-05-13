@@ -48,7 +48,7 @@ exports.addToInventory = (req, res) => {
           amountInStock: req.body.amount,
           description: req.body.description,
         })
-          .then((item) => {
+          .then(() => {
             InventoryHistory.create({
               itemName: req.body.name,
               amount: req.body.amount,
@@ -74,9 +74,45 @@ exports.addToInventory = (req, res) => {
             });
           });
       } else {
-        return res.status(400).json({
-          message: "Item already exists.",
-        });
+        if (item.deleted) {
+          Inventory.update(
+            {
+              deleted: false,
+              deletedDescription: "",
+              description: req.body.description,
+            },
+            { where: { itemName: req.body.name } }
+          )
+            .then(() => {
+              InventoryHistory.create({
+                itemName: req.body.name,
+                amount: req.body.amount,
+                description: req.body.description,
+                transactionType: "receivied",
+              })
+                .then(() => {
+                  res.status(200).json({
+                    message: "Added Item Successfully.",
+                  });
+                })
+                .catch((error) => {
+                  console.log(error);
+                  res.status(400).json({
+                    message: "Unable to add item. Please try again.",
+                  });
+                });
+            })
+            .catch((error) => {
+              console.log(error);
+              res.status(400).json({
+                message: "Unable to add item. Please try again.",
+              });
+            });
+        } else {
+          return res.status(400).json({
+            message: "Item already exists.",
+          });
+        }
       }
     })
     .catch((error) => {
@@ -87,7 +123,6 @@ exports.addToInventory = (req, res) => {
     });
 };
 
-// PUT /api/inventory/:name/update-quantity
 exports.updateItemQuantity = (req, res) => {
   if (req.body.amount <= 0) {
     res.status(400).json({
@@ -163,7 +198,14 @@ exports.deleteItem = (req, res) => {
         transactionType: "consumed",
       })
         .then(() => {
-          Inventory.destroy({ where: { itemName: req.params.name } })
+          Inventory.update(
+            {
+              amountInStock: 0,
+              deleted: true,
+              deletedDescription: req.body.deletedDescription,
+            },
+            { where: { itemName: req.params.name } }
+          )
             .then(() => {
               res.status(200).json({ message: "Deleted Item Successfully." });
             })
@@ -185,5 +227,22 @@ exports.deleteItem = (req, res) => {
       res
         .status(400)
         .json({ message: "Unable to delete item. Please try again." });
+    });
+};
+
+exports.undeleteItem = (req, res) => {
+  Inventory.update(
+    {
+      deleted: false,
+      deletedDescription: "",
+    },
+    { where: { itemName: req.params.name } }
+  )
+    .then(() => {
+      res.status(200).json({ message: "Restored Item Successfully." });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.json({ message: "Unable to restore item. Please try again." });
     });
 };

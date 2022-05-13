@@ -7,6 +7,7 @@ import GetInventoryHistory, {
 } from "./routes/get-inventory-history";
 import AddToInventory from "./routes/add-to-inventory";
 import EditQuantity from "./routes/edit-quantity";
+import DeleteFromInventory from "./routes/delete-from-inventory";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
@@ -22,6 +23,10 @@ root.render(
       />
       <Route path="add-to-inventory" element={<AddToInventory />} />
       <Route path="edit-quantity/:name" element={<EditQuantity />} />
+      <Route
+        path="delete-from-inventory/:name"
+        element={<DeleteFromInventory />}
+      />
     </Routes>
   </BrowserRouter>
 );
