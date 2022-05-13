@@ -14,14 +14,20 @@ export function GetFromInventoryHistory() {
       return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5]));
     }
 
-    axios.get(`/api/inventory-history/${id}`).then((response) => {
-      response.data.item.createdAt = parseISOString(
-        response.data.item.createdAt
-      );
+    axios
+      .get(`/api/inventory-history/${id}`)
+      .then((response) => {
+        response.data.item.createdAt = parseISOString(
+          response.data.item.createdAt
+        );
 
-      setEntry(response.data.item);
-      setLoading(false);
-    });
+        setEntry(response.data.item);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoading(false);
+      });
   }, [id]);
 
   const monthNames = [
@@ -101,16 +107,22 @@ export default function GetInventoryHistory() {
 
   function getEntireInventoryHistory() {
     setLoading(true);
-    axios.get("/api/inventory-history").then((response) => {
-      setHistory(
-        response.data.inventoryHistory.map((item) => {
-          item.createdAt = parseISOString(item.createdAt);
-          return item;
-        })
-      );
-      setItemNameSearch("");
-      setLoading(false);
-    });
+    axios
+      .get("/api/inventory-history")
+      .then((response) => {
+        setHistory(
+          response.data.inventoryHistory.map((item) => {
+            item.createdAt = parseISOString(item.createdAt);
+            return item;
+          })
+        );
+        setItemNameSearch("");
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoading(false);
+      });
   }
 
   useEffect(() => {

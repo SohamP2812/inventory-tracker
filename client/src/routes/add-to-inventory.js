@@ -7,9 +7,11 @@ export default function AddToInventory() {
   const [description, setDescription] = useState();
   const [initialStock, setInitialStock] = useState();
   const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
 
   function handleCreateNewItem(e) {
     e.preventDefault();
+    setLoading(true);
     setError();
     axios
       .post("/api/inventory/add", {
@@ -21,12 +23,24 @@ export default function AddToInventory() {
         setItemName("");
         setDescription("");
         setInitialStock("");
-        console.log(response);
+        setLoading(false);
       })
       .catch((error) => {
         console.log(error);
         setError(error.response.data.message);
+        setLoading(false);
       });
+  }
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <div className="py-20">
+          <p className="text-xl text-center">Loading...</p>
+        </div>
+      </>
+    );
   }
 
   return (

@@ -9,12 +9,22 @@ export default function EditQuantity() {
   const [transactionType, setTransactionType] = useState("received");
   const [description, setDescription] = useState();
   const [error, setError] = useState();
+  const [loading, setLoading] = useState(true);
+
   let { name } = useParams();
 
   function getItem() {
-    axios.get(`/api/inventory/${name}`).then((response) => {
-      setItem(response.data.item);
-    });
+    setLoading(true);
+    axios
+      .get(`/api/inventory/${name}`)
+      .then((response) => {
+        setItem(response.data.item);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setLoading(false);
+      });
   }
 
   useEffect(() => {
@@ -26,6 +36,7 @@ export default function EditQuantity() {
   function handleCreateNewItem(e) {
     e.preventDefault();
     setError();
+    setLoading(true);
     axios
       .put(`/api/inventory/${name}/update-quantity`, {
         amount: quantity,
@@ -37,16 +48,14 @@ export default function EditQuantity() {
         setQuantity("");
         setDescription("");
         getItem();
+        setLoading(false);
       })
       .catch((error) => {
         console.log(error);
         setError(error.response.data.message);
+        setLoading(false);
       });
   }
-
-  useEffect(() => {
-    console.log(transactionType);
-  }, [transactionType]);
 
   return (
     <>

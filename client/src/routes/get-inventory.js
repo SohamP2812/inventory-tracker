@@ -15,24 +15,36 @@ export function GetFromInventory() {
       var b = s.split(/[-TZ:]/i);
       return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5]));
     }
-
-    axios.get(`/api/inventory/${name}`).then((response) => {
-      response.data.item.createdAt = parseISOString(
-        response.data.item.createdAt
-      );
-
-      setItem(response.data.item);
-
-      axios.get(`/api/inventory-history/item-name/${name}`).then((response) => {
-        setItemHistory(
-          response.data.inventoryHistory.map((entry) => {
-            entry.createdAt = parseISOString(entry.createdAt);
-            return entry;
-          })
+    setLoading(true);
+    axios
+      .get(`/api/inventory/${name}`)
+      .then((response) => {
+        response.data.item.createdAt = parseISOString(
+          response.data.item.createdAt
         );
+
+        setItem(response.data.item);
+
+        axios
+          .get(`/api/inventory-history/item-name/${name}`)
+          .then((response) => {
+            setItemHistory(
+              response.data.inventoryHistory.map((entry) => {
+                entry.createdAt = parseISOString(entry.createdAt);
+                return entry;
+              })
+            );
+            setLoading(false);
+          })
+          .catch((error) => {
+            console.log(error);
+            setLoading(false);
+          });
+      })
+      .catch((error) => {
+        console.log(error);
         setLoading(false);
       });
-    });
   }, [name]);
 
   const monthNames = [
@@ -122,7 +134,7 @@ export function GetFromInventory() {
 
 export default function GetInventory() {
   const [inventory, setInventory] = useState();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
   let { name } = useParams();
 
@@ -132,15 +144,23 @@ export default function GetInventory() {
   }
 
   function getInventory() {
-    axios.get("/api/inventory").then((response) => {
-      setInventory(
-        response.data.inventory.map((item) => {
-          item.createdAt = parseISOString(item.createdAt);
-          return item;
-        })
-      );
-      setLoading(false);
-    });
+    setLoading(true);
+    axios
+      .get("/api/inventory")
+      .then((response) => {
+        setInventory(
+          response.data.inventory.map((item) => {
+            item.createdAt = parseISOString(item.createdAt);
+            return item;
+          })
+        );
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setError(error.response.data.message);
+        setLoading(false);
+      });
   }
 
   useEffect(() => {
