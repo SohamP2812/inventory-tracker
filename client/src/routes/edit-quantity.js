@@ -15,6 +15,7 @@ export default function EditQuantity() {
 
   function getItem() {
     setLoading(true);
+    setError("");
     axios
       .get(`/api/inventory/${name}`)
       .then((response) => {
@@ -23,6 +24,7 @@ export default function EditQuantity() {
       })
       .catch((error) => {
         console.log(error);
+        setError(error.response.data.message);
         setLoading(false);
       });
   }
@@ -35,7 +37,7 @@ export default function EditQuantity() {
 
   function handleCreateNewItem(e) {
     e.preventDefault();
-    setError();
+    setError("");
     setLoading(true);
     axios
       .put(`/api/inventory/${name}/update-quantity`, {

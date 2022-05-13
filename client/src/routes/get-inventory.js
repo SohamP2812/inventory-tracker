@@ -106,7 +106,10 @@ export function GetFromInventory() {
             <div className="w-[90%] m-auto bg-gray-800 p-6 mb-4 flex flex-row justify-between rounded-xl">
               <div className="flex flex-col">
                 <p className="text-white">Entry ID: {entry.id}</p>
-                <p className="text-white">Amount: {entry.amount}</p>
+                <p className="text-white">Quantity: {entry.amount}</p>
+                <p className="text-white">
+                  Transaction Type: {entry.transactionType}
+                </p>
                 <p className="text-white">
                   Time:{" "}
                   {`${
@@ -145,6 +148,7 @@ export default function GetInventory() {
 
   function getInventory() {
     setLoading(true);
+    setError("");
     axios
       .get("/api/inventory")
       .then((response) => {
@@ -176,7 +180,7 @@ export default function GetInventory() {
         getInventory();
       })
       .catch((error) => {
-        setError(error);
+        setError(error.response.data.message);
         setLoading(false);
       });
   }

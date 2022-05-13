@@ -5,15 +5,18 @@ import { useParams, Link } from "react-router-dom";
 
 export function GetFromInventoryHistory() {
   const [entry, setEntry] = useState();
-  let { id } = useParams();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
+
+  let { id } = useParams();
 
   useEffect(() => {
     function parseISOString(s) {
       var b = s.split(/[-TZ:]/i);
       return new Date(Date.UTC(b[0], --b[1], b[2], b[3], b[4], b[5]));
     }
-
+    setLoading(true);
+    setError("");
     axios
       .get(`/api/inventory-history/${id}`)
       .then((response) => {
@@ -25,6 +28,7 @@ export function GetFromInventoryHistory() {
         setLoading(false);
       })
       .catch((error) => {
+        setError(error.response.data.message);
         console.log(error);
         setLoading(false);
       });
@@ -61,6 +65,7 @@ export function GetFromInventoryHistory() {
       <Header />
       <div className="py-20">
         <h1 className="text-4xl font-bold text-center mb-10">Get Entry</h1>
+        <p className="text-red-600 text-center">{error}</p>
         {entry && (
           <div className="w-[90%] m-auto">
             <p>
@@ -97,6 +102,7 @@ export function GetFromInventoryHistory() {
 export default function GetInventoryHistory() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState();
   const [itemNameSearch, setItemNameSearch] = useState();
   let { id } = useParams();
 
@@ -107,6 +113,7 @@ export default function GetInventoryHistory() {
 
   function getEntireInventoryHistory() {
     setLoading(true);
+    setError("");
     axios
       .get("/api/inventory-history")
       .then((response) => {
@@ -121,6 +128,7 @@ export default function GetInventoryHistory() {
       })
       .catch((error) => {
         console.log(error);
+        setError(error.response.data.message);
         setLoading(false);
       });
   }
@@ -132,23 +140,27 @@ export default function GetInventoryHistory() {
   const handleSubmitItemName = (e) => {
     e.preventDefault();
     setLoading(true);
-
+    setError("");
+    setLoading(true);
     if (!itemNameSearch) {
       getEntireInventoryHistory();
     } else {
-      axios.get(`/api/inventory/${itemNameSearch}`).then((response) => {
-        axios
-          .get(`/api/inventory-history/item-id/${response.data.item.id}`)
-          .then((response) => {
-            setHistory(
-              response.data.inventoryHistory.map((entry) => {
-                entry.createdAt = parseISOString(entry.createdAt);
-                return entry;
-              })
-            );
-            setLoading(false);
-          });
-      });
+      axios
+        .get(`/api/inventory-history/item-name/${itemNameSearch}`)
+        .then((response) => {
+          setHistory(
+            response.data.inventoryHistory.map((entry) => {
+              entry.createdAt = parseISOString(entry.createdAt);
+              return entry;
+            })
+          );
+          setLoading(false);
+        })
+        .catch((error) => {
+          setError(error.response.data.message);
+          setLoading(false);
+          console.log(error);
+        });
     }
   };
 
@@ -210,6 +222,7 @@ export default function GetInventoryHistory() {
               Reset
             </button>
           </div>
+          <p className="text-red-600 text-center">{error}</p>
           {history.map((item) => (
             <div className="w-[90%] m-auto bg-gray-800 p-6 mb-4 flex flex-row justify-between rounded-xl">
               <div className="flex flex-col">
