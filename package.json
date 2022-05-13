@@ -1,0 +1,16 @@
+{
+  "name": "inventory-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start-client": "cd client && yarn run start",
+    "start": "(cd client && yarn run build) && (cd server && yarn start)"
+  },
+  "dependencies": {
+    "mongoose-paginate": "^5.0.3",
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4",
+    "react-router-dom": "^6.3.0",
+    "sequelize": "^6.19.0"
+  }
+}
