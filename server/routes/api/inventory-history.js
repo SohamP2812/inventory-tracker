@@ -38,7 +38,10 @@ router.get("/:id", (req, res) => {
 
 // GET /api/inventory-history/item-name/:name
 router.get("/item-name/:name", (req, res) => {
-  InventoryHistory.findAll({ where: { itemName: req.params.name } })
+  InventoryHistory.findAll({
+    where: { itemName: req.params.name },
+    order: [["createdAt", "DESC"]],
+  })
     .then((inventoryHistory) => {
       res.status(200).json({
         message: "Retrieved Items Successfully.",
