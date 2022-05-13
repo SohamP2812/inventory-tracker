@@ -30,7 +30,7 @@ db.sequelize = sequelize;
 
 module.exports = db;
 
-app.use(express.static(path.join(__dirname, "..", "views", "build")));
+app.use(express.static(path.join(__dirname, "..", "client", "build")));
 
 const inventoryRouter = require("./routes/api/inventory");
 const inventoryHistoryRouter = require("./routes/api/inventory-history");
@@ -39,7 +39,7 @@ app.use("/api/inventory", inventoryRouter);
 app.use("/api/inventory-history", inventoryHistoryRouter);
 
 app.use((req, res, next) => {
-  res.sendFile(path.join(__dirname, "..", "views", "build", "index.html"));
+  res.sendFile(path.join(__dirname, "..", "client", "build", "index.html"));
 });
 
 app.use((req, res, next) => {
