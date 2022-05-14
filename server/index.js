@@ -13,7 +13,7 @@ app.use(cors());
 
 app.use(logger("dev"));
 
-const sequelize = new Sequelize("postgresql://localhost/inventory");
+const sequelize = new Sequelize("postgresql://127.0.0.1/inventory");
 sequelize
   .authenticate()
   .then(() => {

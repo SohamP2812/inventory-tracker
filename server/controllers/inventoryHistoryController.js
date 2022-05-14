@@ -1,5 +1,7 @@
 const InventoryHistory = require("../models/InventoryHistory.model");
 
+// Handler for GET @ /api/inventory-history
+// Returns list of all inventory history entries
 exports.getAllInventoryHistory = (req, res) => {
   InventoryHistory.findAll({ order: [["createdAt", "DESC"]] })
     .then((inventoryHistory) => {
@@ -19,6 +21,8 @@ exports.getAllInventoryHistory = (req, res) => {
     });
 };
 
+// Handler for GET @ /api/inventory-history/:id
+// Returns a specific inventory history entry with the desired id (if it exists)
 exports.getInventoryHistoryEntry = (req, res) => {
   InventoryHistory.findByPk(req.params.id)
     .then((item) => {
@@ -38,6 +42,8 @@ exports.getInventoryHistoryEntry = (req, res) => {
     });
 };
 
+// Handler for GET @ /api/inventory-history/item-name/:name
+// Returns all entries associated with a specific inventory item name
 exports.filterInventoryHistoryByItem = (req, res) => {
   InventoryHistory.findAll({
     where: { itemName: req.params.name },
@@ -57,7 +63,8 @@ exports.filterInventoryHistoryByItem = (req, res) => {
     });
 };
 
-// DELETE /api/inventory-history/:id/delete
+// Handler for DELETE @ /api/inventory-history/:id/delete
+// Deletes an entry corresponding with the specified id (PK)
 exports.deleteEntry = (req, res) => {
   InventoryHistory.destroy({ where: { id: req.params.id } })
     .then(() => {
