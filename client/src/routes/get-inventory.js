@@ -238,7 +238,9 @@ export default function GetInventory() {
               <div className="w-[90%] m-auto bg-gray-800 p-6 mb-4 flex flex-row justify-between rounded-xl">
                 <div className="flex flex-col">
                   <p className="text-white">{item.itemName}</p>
-                  <p className="text-white">Stock: {item.amountInStock}</p>
+                  {!item.deleted && (
+                    <p className="text-white">Stock: {item.amountInStock}</p>
+                  )}
                   {item.deleted && <p className="text-white">DELETED</p>}
                 </div>
                 <div>
