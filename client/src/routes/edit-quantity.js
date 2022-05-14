@@ -53,6 +53,7 @@ export default function EditQuantity() {
         setLoading(false);
       })
       .catch((error) => {
+        setTransactionType("received");
         console.log(error);
         setError(error.response.data.message);
         setLoading(false);
