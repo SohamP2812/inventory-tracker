@@ -1,6 +1,5 @@
 if [ "$REPL" == "true" ]
 then
-rm -rf data
 pg_ctl stop
 
 initdb
@@ -14,6 +13,7 @@ pg_ctl -l /home/runner/${REPL_SLUG}/postgresql.log start
 fi
 
 createdb -h 127.0.0.1
+psql -h 127.0.0.1 -c "drop database inventory;"
 psql -h 127.0.0.1 -c "create database inventory;"
 
 cd server 
