@@ -1,5 +1,6 @@
 if [ "$REPL" == "true" ]
 then
+rm -rf data
 pg_ctl stop
 
 initdb
@@ -17,4 +18,4 @@ psql -h 127.0.0.1 -c "create database inventory;"
 
 cd server 
 
-yarn start
+npm run start
