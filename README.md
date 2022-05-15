@@ -1,5 +1,5 @@
 # Inventory Tracking Web Application - Shopify Developer Intern Challenge Fall 2022
-My take on the Shopify Developer Intern Challenge for Fall 2022. Built a full stack web application built with ReactJS, ExpressJS, Node.JS, and PotsgreSQL. 
+My take on the Shopify Developer Intern Challenge for Fall 2022. Built a full stack web application built with ReactJS, ExpressJS, Node.JS, and PostgreSQL. 
 The primary purpose of this project was to build a robust and high-quality backend that is used for CRUD operations on a database to store inventory items 
 and inventory transactions. 
 
