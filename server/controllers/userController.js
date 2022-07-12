@@ -8,7 +8,7 @@ exports.createUser = (req, res) => {
   const { username, email, password } = req.body;
 
   if (!(username && email && password)) {
-    res.status(400).send("All fields are required.");
+    return res.status(400).send("All fields are required.");
   }
 
   User.findOne({ where: { email: email } })
@@ -48,14 +48,14 @@ exports.createUser = (req, res) => {
                     })
                     .catch((error) => {
                       console.log(error);
-                      res.status(400).json({
+                      return res.status(400).json({
                         message: "Unable to create user. Please try again.",
                       });
                     });
                 })
                 .catch((error) => {
                   console.log(error);
-                  res.status(400).json({
+                  return res.status(400).json({
                     message: "Unable to create user. Please try again.",
                   });
                 });
@@ -65,7 +65,7 @@ exports.createUser = (req, res) => {
           })
           .catch((error) => {
             console.log(error);
-            res.status(400).json({
+            return res.status(400).json({
               message: "Unable to create user. Please try again.",
             });
           });
@@ -75,7 +75,7 @@ exports.createUser = (req, res) => {
     })
     .catch((error) => {
       console.log(error);
-      res.status(400).json({
+      return res.status(400).json({
         message: "Unable to create user. Please try again.",
       });
     });
@@ -87,7 +87,7 @@ exports.loginUser = (req, res) => {
   const { email, password } = req.body;
 
   if (!(email && password)) {
-    res.status(400).send("All fields are required.");
+    return res.status(400).send("All fields are required.");
   }
 
   User.findOne({ where: { email: email } })
@@ -124,7 +124,7 @@ exports.loginUser = (req, res) => {
           })
           .catch((error) => {
             console.log(error);
-            res.status(400).json({
+            return res.status(400).json({
               message: "Unable to login. Please try again.",
             });
           });
@@ -132,7 +132,7 @@ exports.loginUser = (req, res) => {
     })
     .catch((error) => {
       console.log(error);
-      res.status(400).json({
+      return res.status(400).json({
         message: "Unable to login. Please try again.",
       });
     });

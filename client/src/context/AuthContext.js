@@ -19,6 +19,7 @@ export const AuthProvider = ({ children }) => {
 
   function saveToken(userToken) {
     localStorage.setItem("token", JSON.stringify(userToken));
+    axios.defaults.headers.common["x-access-token"] = userToken;
     setToken(userToken);
   }
 
