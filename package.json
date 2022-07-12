@@ -1,0 +1,13 @@
+{
+  "name": "inventory-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start-client": "cd client && yarn run start",
+    "start": "(cd client && yarn run build) && (cd server && yarn start)",
+    "install-all": "(npm install) && (cd client && npm install) && (cd server && npm install)"
+  },
+  "dependencies": {
+    "pm2": "^5.2.0"
+  }
+}
