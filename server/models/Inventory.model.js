@@ -8,6 +8,11 @@ const Inventory = db.sequelize.define(
       allowNull: false,
       primaryKey: true,
     },
+    inventoryID: {
+      type: db.Sequelize.UUID,
+      defaultValue: db.Sequelize.UUIDV4,
+      allowNull: false,
+    },
     amountInStock: {
       type: db.Sequelize.INTEGER,
       allowNull: false,

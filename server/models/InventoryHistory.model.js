@@ -3,6 +3,11 @@ const db = require("../index");
 const InventoryHistory = db.sequelize.define(
   "inventory_history",
   {
+    inventoryID: {
+      type: db.Sequelize.UUID,
+      defaultValue: db.Sequelize.UUIDV4,
+      allowNull: false,
+    },
     itemName: {
       type: db.Sequelize.STRING,
       allowNull: false,

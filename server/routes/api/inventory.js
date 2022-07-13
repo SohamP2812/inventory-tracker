@@ -4,6 +4,9 @@ const auth = require("../../middlewares/auth");
 
 const inventoryController = require("../../controllers/inventoryController");
 
+// POST /api/inventory
+router.post("/", auth, inventoryController.createInventory);
+
 // GET /api/inventory
 router.get("/", auth, inventoryController.getAllInventory);
 

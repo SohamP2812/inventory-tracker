@@ -1,10 +1,39 @@
 const InventoryHistory = require("../models/InventoryHistory.model");
 const Inventory = require("../models/Inventory.model");
+const Inventories = require("../models/Inventories.model");
+
+// Handler for POST @ /api/inventory
+// Creates inventory
+exports.createInventory = (req, res) => {
+  const { name } = req.body;
+
+  Inventories.create({
+    name: name,
+    creator: req.user.user_id,
+  })
+    .then((inventory) => {
+      return res.status(200).json({
+        message: "Created Inventory Successfully.",
+        inventory_id: inventory.id,
+      });
+    })
+    .catch((error) => {
+      console.log(error);
+      return res.status(400).json({
+        message: "Unable to create inventory. Please try again.",
+      });
+    });
+};
 
 // Handler for GET @ /api/inventory
 // Returns list of all inventory items
 exports.getAllInventory = (req, res) => {
-  Inventory.findAll({ order: [["createdAt", "DESC"]] })
+  const { inventoryID } = req.body;
+
+  Inventory.findAll({
+    where: { inventoryID: inventoryID },
+    order: [["createdAt", "DESC"]],
+  })
     .then((inventory) => {
       const message = inventory.length
         ? "Retrieved Inventory Successfully."
@@ -25,7 +54,12 @@ exports.getAllInventory = (req, res) => {
 // Handler for GET @ /api/inventory/:name
 // Returns a specific inventory item with the desired item name (if it exists)
 exports.getInventoryItem = (req, res) => {
-  Inventory.findOne({ where: { itemName: req.params.name } })
+  const { inventoryID } = req.body;
+  const { name } = req.params;
+
+  Inventory.findOne({
+    where: { inventoryID: inventoryID, itemName: name },
+  })
     .then((item) => {
       if (item == null) {
         res.status(400).json({ message: "Item not found in inventory." });
@@ -46,19 +80,23 @@ exports.getInventoryItem = (req, res) => {
 // Handler for POST @ /api/inventory/add
 // Adds a new inventory item in the inventory table with a specified name (PK), initial stock, and item description
 exports.addToInventory = (req, res) => {
+  const { inventoryID, name, amount, description } = req.body;
+
   Inventory.findOne({ where: { itemName: req.body.name } })
     .then((item) => {
       if (item === null) {
         Inventory.create({
-          itemName: req.body.name,
-          amountInStock: req.body.amount,
-          description: req.body.description,
+          inventoryID: inventoryID,
+          itemName: name,
+          amountInStock: amount,
+          description: description,
         })
           .then(() => {
             InventoryHistory.create({
-              itemName: req.body.name,
-              amount: req.body.amount,
-              description: req.body.description,
+              inventoryID: inventoryID,
+              itemName: name,
+              amount: amount,
+              description: description,
               transactionType: "receivied",
             })
               .then(() => {
@@ -85,15 +123,16 @@ exports.addToInventory = (req, res) => {
             {
               deleted: false,
               deletedDescription: "",
-              description: req.body.description,
+              description: description,
             },
-            { where: { itemName: req.body.name } }
+            { where: { itemName: name } }
           )
             .then(() => {
               InventoryHistory.create({
-                itemName: req.body.name,
-                amount: req.body.amount,
-                description: req.body.description,
+                inventoryID: inventoryID,
+                itemName: name,
+                amount: amount,
+                description: description,
                 transactionType: "receivied",
               })
                 .then(() => {
@@ -133,56 +172,59 @@ exports.addToInventory = (req, res) => {
 // Increases or decreases the quantity of a specified item by a specified amount and creates a subsequent inventory history entry
 // Handles error if amount to be decreased is more than existing inventory quantity
 exports.updateItemQuantity = (req, res) => {
-  if (req.body.amount <= 0) {
-    res.status(400).json({
+  const { inventoryID, amount, description, transactionType } = req.body;
+  const { name } = req.params;
+
+  if (amount <= 0) {
+    return res.status(400).json({
       message: "Please enter a quantity above 0.",
     });
   }
-  Inventory.findByPk(req.params.name)
+
+  Inventory.findOne({
+    where: { inventoryID: inventoryID, itemName: name },
+  })
     .then((item) => {
       if (item === null) {
-        res.status(400).json({ message: "Item does not exist." });
+        return res.status(400).json({ message: "Item does not exist." });
       } else {
-        if (
-          req.body.transactionType == "consumed" &&
-          item.amountInStock - req.body.amount < 0
-        ) {
-          res.status(400).json({
+        if (transactionType == "consumed" && item.amountInStock - amount < 0) {
+          return res.status(400).json({
             message:
               "Existing quantity in stock is insufficient to reduce by transaction.",
           });
         } else {
           InventoryHistory.create({
-            itemName: req.params.name,
-            amount: req.body.amount,
-            description: req.body.description,
-            transactionType: req.body.transactionType,
+            inventoryID: inventoryID,
+            itemName: name,
+            amount: amount,
+            description: description,
+            transactionType:
+              transactionType == "consumed" ? "consumed" : "received",
           })
             .then(() => {
               Inventory.increment(
                 {
                   amountInStock:
-                    req.body.transactionType == "received"
-                      ? req.body.amount
-                      : -1 * req.body.amount,
+                    transactionType == "consumed" ? -1 * amount : amount,
                 },
-                { where: { itemName: req.params.name } }
+                { where: { inventoryID: inventoryID, itemName: name } }
               )
                 .then(() => {
-                  res.status(200).json({
+                  return res.status(200).json({
                     message: "Updated Item Successfully.",
                   });
                 })
                 .catch((error) => {
                   console.log(error);
-                  res.status(400).json({
+                  return res.status(400).json({
                     message: "Unable to change item's quantity.",
                   });
                 });
             })
             .catch((error) => {
               console.log(error);
-              res.status(400).json({
+              return res.status(400).json({
                 message: "Unable to add item. Please try again.",
               });
             });
@@ -201,10 +243,15 @@ exports.updateItemQuantity = (req, res) => {
 // Updates 'deleted' value from false to true and populates 'deletedDescription' for a specified inventory item
 // Also creates a corresponding inventory history entry to display the entire quantity being consumed
 exports.deleteItem = (req, res) => {
-  Inventory.findByPk(req.params.name)
+  const { inventoryID, deletedDescription } = req.body;
+  const { name } = req.params;
+
+  Inventory.findOne({
+    where: { inventoryID: inventoryID, itemName: name },
+  })
     .then((item) => {
       InventoryHistory.create({
-        itemName: req.params.name,
+        itemName: name,
         amount: item.amountInStock,
         description: "Deleted inventory item.",
         transactionType: "consumed",
@@ -214,21 +261,25 @@ exports.deleteItem = (req, res) => {
             {
               amountInStock: 0,
               deleted: true,
-              deletedDescription: req.body.deletedDescription,
+              deletedDescription: deletedDescription,
             },
-            { where: { itemName: req.params.name } }
+            { where: { inventoryID: inventoryID, itemName: name } }
           )
             .then(() => {
-              res.status(200).json({ message: "Deleted Item Successfully." });
+              return res
+                .status(200)
+                .json({ message: "Deleted Item Successfully." });
             })
             .catch((error) => {
               console.log(error);
-              res.json({ message: "Unable to delete item. Please try again." });
+              return res.json({
+                message: "Unable to delete item. Please try again.",
+              });
             });
         })
         .catch((error) => {
           console.log(error);
-          res.status(400).json({
+          return res.status(400).json({
             message:
               "Added inventory history entry for deletion, but was unable to delete inventory item.",
           });
@@ -236,7 +287,7 @@ exports.deleteItem = (req, res) => {
     })
     .catch((error) => {
       console.log(error);
-      res
+      return res
         .status(400)
         .json({ message: "Unable to delete item. Please try again." });
     });
@@ -245,18 +296,21 @@ exports.deleteItem = (req, res) => {
 // Handler for DELETE @ /api/inventory/:name/undelete
 // Updates 'deleted' value from true to false and resets 'deletedDescription' for a specified inventory item
 exports.undeleteItem = (req, res) => {
+  const { inventoryID } = req.body;
+  const { name } = req.params;
+
   Inventory.update(
     {
       deleted: false,
       deletedDescription: "",
     },
-    { where: { itemName: req.params.name } }
+    { where: { inventoryID: inventoryID, itemName: name } }
   )
     .then(() => {
-      res.status(200).json({ message: "Restored Item Successfully." });
+      return res.status(200).json({ message: "Restored Item Successfully." });
     })
     .catch((error) => {
       console.log(error);
-      res.json({ message: "Unable to restore item. Please try again." });
+      return res.json({ message: "Unable to restore item. Please try again." });
     });
 };
